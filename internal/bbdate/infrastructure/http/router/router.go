@@ -23,7 +23,7 @@ import (
 
 var (
 	ginRouter *gin.Engine
-	routerG   *gin.RouterGroup
+	// routerG   *gin.RouterGroup
 )
 
 func init() {
@@ -54,7 +54,6 @@ func setRouter(con *dig.Container) {
 	corsRouter := NewCorsRouterImpl(ginRouter, config.EnvStore.CORSAcceptOrigin)
 	corsRouter.Use(helper.GenerateXRequestID())
 	corsRouter.Use(user_helper.AuthRequired())
-	fmt.Println()
 
 	err := con.Invoke(func(
 		authController controller.IAuthController,
@@ -67,13 +66,12 @@ func setRouter(con *dig.Container) {
 	if err != nil {
 		logging.Fatal("system", fmt.Sprintf("cannot Invoke =>%v", err))
 	}
-	fmt.Println("=====con=====")
 }
 
 func Run() {
 	appServer := &http.Server{
 		Handler: ginRouter,
-		Addr:    fmt.Sprintf("0.0.0.0:%d", 8000),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", 8080),
 	}
 	go func() {
 		logging.Debug("system", fmt.Sprintf("Listening and serving HTTP on %s", appServer.Addr))

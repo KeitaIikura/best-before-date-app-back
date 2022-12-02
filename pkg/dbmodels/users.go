@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,9 +25,11 @@ import (
 type User struct { // ID
 	ID int64 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	// ユーザー名
-	Name string `boil:"name" json:"name" toml:"name" yaml:"name"`
-	// Eメールアドレス
-	EmailAddress null.String `boil:"email_address" json:"email_address,omitempty" toml:"email_address" yaml:"email_address,omitempty"`
+	UserName string `boil:"user_name" json:"user_name" toml:"user_name" yaml:"user_name"`
+	// メールアドレス
+	EmailAddress string `boil:"email_address" json:"email_address" toml:"email_address" yaml:"email_address"`
+	// パスワード
+	Password string `boil:"password" json:"password" toml:"password" yaml:"password"`
 	// 生成日時
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	// 更新日時
@@ -40,68 +41,117 @@ type User struct { // ID
 
 var UserColumns = struct {
 	ID           string
-	Name         string
+	UserName     string
 	EmailAddress string
+	Password     string
 	CreatedAt    string
 	UpdatedAt    string
 }{
 	ID:           "id",
-	Name:         "name",
+	UserName:     "user_name",
 	EmailAddress: "email_address",
+	Password:     "password",
 	CreatedAt:    "created_at",
 	UpdatedAt:    "updated_at",
 }
 
 var UserTableColumns = struct {
 	ID           string
-	Name         string
+	UserName     string
 	EmailAddress string
+	Password     string
 	CreatedAt    string
 	UpdatedAt    string
 }{
 	ID:           "users.id",
-	Name:         "users.name",
+	UserName:     "users.user_name",
 	EmailAddress: "users.email_address",
+	Password:     "users.password",
 	CreatedAt:    "users.created_at",
 	UpdatedAt:    "users.updated_at",
 }
 
 // Generated where
 
-type whereHelpernull_String struct{ field string }
+type whereHelperint64 struct{ field string }
 
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
+func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var UserWhere = struct {
 	ID           whereHelperint64
-	Name         whereHelperstring
-	EmailAddress whereHelpernull_String
+	UserName     whereHelperstring
+	EmailAddress whereHelperstring
+	Password     whereHelperstring
 	CreatedAt    whereHelpertime_Time
 	UpdatedAt    whereHelpertime_Time
 }{
 	ID:           whereHelperint64{field: "`users`.`id`"},
-	Name:         whereHelperstring{field: "`users`.`name`"},
-	EmailAddress: whereHelpernull_String{field: "`users`.`email_address`"},
+	UserName:     whereHelperstring{field: "`users`.`user_name`"},
+	EmailAddress: whereHelperstring{field: "`users`.`email_address`"},
+	Password:     whereHelperstring{field: "`users`.`password`"},
 	CreatedAt:    whereHelpertime_Time{field: "`users`.`created_at`"},
 	UpdatedAt:    whereHelpertime_Time{field: "`users`.`updated_at`"},
 }
@@ -123,8 +173,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "name", "email_address", "created_at", "updated_at"}
-	userColumnsWithoutDefault = []string{"name", "email_address"}
+	userAllColumns            = []string{"id", "user_name", "email_address", "password", "created_at", "updated_at"}
+	userColumnsWithoutDefault = []string{"user_name", "email_address", "password"}
 	userColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}

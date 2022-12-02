@@ -12,28 +12,28 @@ import (
 )
 
 type AuthService interface {
-	Login(ctx context.Context, xRequestID string, userID string, password string) (*model.AuthUser, error)
+	Login(ctx context.Context, xRequestID string, userID string, password string) (*model.User, error)
 	UpdatePassword(ctx context.Context, xrid string, userID int64, oldPw string, newPw string) error
 }
 
 type AuthServiceImple struct {
-	AuthUserRepo repository.AuthUserRepository
-	Crypter      crypter.ICrypter
+	UserRepo repository.UserRepository
+	Crypter  crypter.ICrypter
 }
 
 func NewAuthService(
-	authUserRepo repository.AuthUserRepository,
+	userRepo repository.UserRepository,
 	crypter crypter.ICrypter,
 ) AuthService {
 	return &AuthServiceImple{
-		AuthUserRepo: authUserRepo,
-		Crypter:      crypter,
+		UserRepo: userRepo,
+		Crypter:  crypter,
 	}
 }
 
-func (s *AuthServiceImple) Login(ctx context.Context, xrid string, userID string, password string) (*model.AuthUser, error) {
+func (s *AuthServiceImple) Login(ctx context.Context, xrid string, userID string, password string) (*model.User, error) {
 	// userID(emailaddress)で検索
-	user, err := s.AuthUserRepo.GetByEmailAddress(ctx, xrid, userID)
+	user, err := s.UserRepo.GetByEmailAddress(ctx, xrid, userID)
 	if err != nil {
 		logging.Error(xrid, fmt.Sprintf("AuthService Login error: %v", err))
 		return nil, apperr.NewTmxError(apperr.ErrCodeDBConnection, err)
@@ -56,7 +56,7 @@ func (s *AuthServiceImple) Login(ctx context.Context, xrid string, userID string
 }
 
 func (s *AuthServiceImple) UpdatePassword(ctx context.Context, xrid string, userID int64, oldPw string, newPw string) error {
-	user, err := s.AuthUserRepo.GetByID(ctx, xrid, userID)
+	user, err := s.UserRepo.GetByID(ctx, xrid, userID)
 	if err != nil {
 		logging.Error(xrid, fmt.Sprintf("AuthService UpdatePassword error: %v", err))
 		return apperr.NewTmxError(apperr.ErrCodeDBConnection, err)
@@ -72,7 +72,7 @@ func (s *AuthServiceImple) UpdatePassword(ctx context.Context, xrid string, user
 	hashedNewPw := s.Crypter.GenerateSha512Hash(newPw)
 	user.Password = hashedNewPw
 
-	err = s.AuthUserRepo.Update(ctx, xrid, *user)
+	err = s.UserRepo.Update(ctx, xrid, *user)
 	if err != nil {
 		return apperr.NewTmxError(apperr.ErrCodeDBConnection, err)
 	}

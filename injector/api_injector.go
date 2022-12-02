@@ -25,7 +25,7 @@ func provideAPIInjection() {
 	err = multierr.Append(err, c.Provide(service.NewAuthService))
 
 	// repository (gateway)
-	err = multierr.Append(err, c.Provide(gateway.NewAuthUserGateway))
+	err = multierr.Append(err, c.Provide(gateway.NewUserGateway))
 
 	if err != nil {
 		errs := multierr.Errors(err)

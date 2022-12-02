@@ -4,9 +4,7 @@
 package dbmodels
 
 var TableNames = struct {
-	AuthUsers string
-	Users     string
+	Users string
 }{
-	AuthUsers: "auth_users",
-	Users:     "users",
+	Users: "users",
 }
