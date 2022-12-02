@@ -1,0 +1,11 @@
+no-tests = true
+wipe     = true
+pkgname = "dbmodels"
+[mysql]
+  dbname  = "bbdate"
+  host    = "db"
+  port    = 3306
+  user    = "root"
+  pass    = "root"
+  sslmode = "false"
+  blacklist = ["schema_migrations"]

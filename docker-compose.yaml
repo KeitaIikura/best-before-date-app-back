@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  db:
+    build:
+      context: ./build/mysql
+      dockerfile: Dockerfile
+    platform: linux/x86_64
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bbdate
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3308:3306
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD
+      interval: 5s
+      timeout: 5s
+      start_period: 5s
+      retries: 10
+  redis:
+    image: redis:latest
+    tty: true
+    ports:
+      - 6379:6379
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "3000:8080"
+    env_file:
+      - ./configs/.env.local
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+      - mail
+  migrate:
+    build:
+      context: .
+      dockerfile: ./build/migrate/Dockerfile
+    environment:
+      DIR: migrations
+      VER: "1"
+      SCHEMA: bbdate
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # for-dev
+  sqlboiler:
+    build:
+      context: ./build/sqlboiler/
+      dockerfile: Dockerfile
+    environment:
+      SQLBOILER_OUT_DIR: /sqlboiler/dbmodels
+    volumes:
+      - ./tmp/dbmodels:/sqlboiler/dbmodels
+    depends_on:
+      db:
+        condition: service_healthy
+  mail:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
